@@ -2,6 +2,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 import pandas as pd
 import json
+import matplotlib.pyplot as plt
 
 def fitpeak(x, y, minpoint, maxpoint):
     """Find a peak by fitting a Gaussian to data
@@ -52,9 +53,8 @@ def dumpa(name="jsons\\kvant.json",result=None):
 def loada(name="jsons\\kvant.json"):
     with open(name,"r") as f:
         return json.load(f)
-
-
-def getfile():
+    
+def getfiles():
     excel_file_path = 'excels\\Kvantdata.xlsx'
 
     # Read the entire Excel file with all sheets
@@ -95,7 +95,9 @@ def getfile():
         ddddd["k"]=names
     return ddddd
 
-import matplotlib.pyplot as plt
+
+
+#plottar detta alla helt enkelt ?
 def plotaone(data):
     nonames=['Dag1 matning2']
     names=['Dag1 matningar', 'Dag1 Matning 3.1', 'Dag1 Matning 3.2', 'Matning 4 -Cd', 'Matning 5.1 - Cd', 'Matning 5.2 - Na', 'matning 6 - Na', 'Matning 7 - Na', 'Matning 8 - H', 'Matning 9 - H']
@@ -103,7 +105,9 @@ def plotaone(data):
         plt.title(name)
         plt.plot(data[name+"_x"],data[name+"_y"])
         plt.show()
-dumpa(result=getfile())
-data=loada()
-print(data.get("k"))
-plotaone(data)
+        
+        
+#dumpa(result=getfiles())
+#data=loada()
+#print(data.get("k"))
+#plotaone(data)

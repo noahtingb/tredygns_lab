@@ -62,5 +62,5 @@ def plotaone(data):
         plt.plot(data[name+"_x"],data[name+"_y"])
         plt.show()
 
-data=loada()
-plotaone(data)
+#data=loada()
+#plotaone(data)
