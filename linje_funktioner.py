@@ -23,7 +23,7 @@ def get_lines(element, raw = False):
     
     retur_varde = pd.read_csv(filnamn)
     if(not raw):
-        retur_varde = retur_varde.replace(['[\[\]="*wrbl()]'],[""], regex = True)
+        retur_varde = retur_varde.replace(['[\[\]="*wrbl()f]'],[""], regex = True)
 
     return retur_varde
 
