@@ -45,20 +45,21 @@ def NIST_spektrum(element, max_peak):
 #anger våglängder med icke exakta värden i exakta "hinkar" för ämnet i fråga
 #och returnerar korrekt amplitud med korrekt våglängd
 #amplituder, våglängder och element
-def bucketer(amp, wl, element):
+def bucketer(amp, wl, element, max_err = 5):
     lines = get_lines(element)
     wl_t = pd.to_numeric(lines["ritz_wl_air(nm)"]) #ritz våglängd, våglängden som fås från energiskillnaden
     
     ut_amp  = np.zeros(len(wl_t))
-    
+    err = np.ones(len(wl_t))*max_err #anger vad det minimala funna felet för ett visst wl är.
+    #max_err anger maximala tillåtna felet innan funktionen ignorerar våglängds kandidaten.
     
     
     for i, a in enumerate(wl):
         index = np.argmin(np.abs(wl_t - a)) #returnerar indexet av den exakta våglängden som minimerar avståndet mellan den exakta och uppmätta.
-        if(ut_amp[index] != 0):
-            raise Exception("angivna våglängden: " + wl[index] + "är för nära annan våglängd. Filtrera ut våglängder längre ifrån" + a)
-        else:
+        lokal_err = np.abs(wl_t[index] - a) #värdet av det funna minimumet
+        if(err[index] > lokal_err): #bekräftar att detta minimat är det minsta funna
             ut_amp[index] = amp[i]
+            err[index] = lokal_err
             
     return ut_amp
 
@@ -70,7 +71,7 @@ def bucketer(amp, wl, element):
 def trans_prob(element, amp):
     
     lines = get_lines(element)
-    wl_t = lines["ritz_wl_air(nm)"]
+    wl = lines["ritz_wl_air(nm)"]
     
     E_k = lines["Ek(eV)"] #initial energier
     
@@ -89,10 +90,11 @@ def trans_prob(element, amp):
             np.put(trans_prob, index, amp[index]/norm) #sätter in beräknade sannolikheter där de ska vara
             
     return trans_prob
-    
+
+
 #konverterar inexakt data till transitions sannolikheter för alla möjliga våglängder för en neutral atom mellan 200 till 1000 nm   
-def data_till_prob(amp, wl, element):
-    return trans_prob(element, bucketer(amp, wl, element))
+def data_till_prob(amp, wl, element, maxerr = 5):
+    return trans_prob(element, bucketer(amp, wl, element, max_err=maxerr))
     
     
     
