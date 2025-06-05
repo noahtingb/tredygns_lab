@@ -95,6 +95,8 @@ def trans_prob(element, amp):
 #konverterar inexakt data till transitions sannolikheter för alla möjliga våglängder för en neutral atom mellan 200 till 1000 nm   
 def data_till_prob(amp, wl, element, maxerr = 5):
     return trans_prob(element, bucketer(amp, wl, element, max_err=maxerr))
+
+
     
     
     
