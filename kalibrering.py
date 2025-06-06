@@ -38,14 +38,19 @@ def init_calibrering():
 
 
 #gör linfit mellan observerade och databas peaks
-def calib(z):
-    #observerade våglängder från dubbelpeak av Na från NIST är 
-    #588.995095 nm och 589.592424 nm
+def calib():
     
-    x = [5.87878676e+02,5.88487472e+02]
-    y = [588.995095, 589.592424]
+    #kalibrering gjort m.a.p mätning 9 med väte
+    x = [395.78279299, 408.95198254,432.88231291, 484.68510924,655.06996891,843.74378532,867.2670103]
+    y = [397.0075, 410.1734, 434.0472, 486.135 , 656.279 , 843.795 , 866.502 ]
     w = np.polyfit(x,y,1)
     k = w[0]
     m = w[1]
     
-    return k*z + m
+    return k, m
+
+#linfit från mätning 9, denna funktion tar in okalibrerad x koordinater och ger kalibrerade x koordinater
+def adjust(z):
+    return 0.996492895776221*z + 2.842074706455973
+    
+    
