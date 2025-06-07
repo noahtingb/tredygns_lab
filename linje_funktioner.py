@@ -70,7 +70,8 @@ def NIST_spektrum(linjer, max_peak):
 #amplituder, våglängder och element
 def bucketer(amp, wl, lines, max_err = 5):
     
-    wl_t = pd.to_numeric(lines["ritz_wl_air(nm)"]) #ritz våglängd, våglängden som fås från energiskillnaden
+    
+    wl_t = np.array(pd.to_numeric(lines["ritz_wl_air(nm)"])) #ritz våglängd, våglängden som fås från energiskillnaden
     
     ut_amp  = np.zeros(len(wl_t))
     err = np.ones(len(wl_t))*max_err #anger vad det minimala funna felet för ett visst wl är.
@@ -83,8 +84,73 @@ def bucketer(amp, wl, lines, max_err = 5):
         if(err[index] > lokal_err): #bekräftar att detta minimat är det minsta funna
             ut_amp[index] = amp[i]
             err[index] = lokal_err
-            
+    
+    print(amp ,"bucketer")
     return ut_amp
+
+
+
+#använder amplituder av våglängder för att beräkna transitions sannolikheter för
+#specifierade transitioner. Transitionerna kommer mappas tillbaka till våglängder
+#då våglängderna identifierar transitionerna unikt
+#P = amplitud för wl/summa av amplituder för wl med samma initala energi
+def trans_prob(lines, amp):
+    
+    
+    wl = pd.to_numeric(lines["ritz_wl_air(nm)"])
+    
+    E_k = lines["Ek(eV)"] #initial energier
+    
+    u_Ek = np.unique(pd.to_numeric(E_k))
+    
+    trans_prob = np.zeros(len(wl)) #transitions sannolikheter
+    
+    
+    for wl_i in u_Ek:
+        index = np.where(abs(wl_i - wl) < 0.01)[0] #plockar ut index med spec. våglängd
+        print(index)
+        
+        if(len(index) == 1):
+            trans_prob[index] = 1
+            
+        else:
+            norm = np.sum(amp[index]) #summerar amp för norm
+            np.put(trans_prob, index, amp[index]/norm) #sätter in beräknade sannolikheter där de ska vara
+           
+    return trans_prob
+
+
+#använder data för att konstruera matris som beskriver sannolikheten för en energinivå att övergå till en annan
+def data_till_prob(amp, wl, lines, maxerr = 5):
+    wl_f = auto_assigner(wl, lines)
+    
+    Ei = lines[pd.to_numeric(lines["obs_wl_air(nm)"]).isin(wl_f)]["Ei(eV)"]
+    Ek = lines[pd.to_numeric(lines["obs_wl_air(nm)"]).isin(wl_f)]["Ek(eV)"]
+    
+    uEi = np.unique(Ei)
+    uEk = np.unique(Ek)
+    #dessa funktioner fiskar ur energinivåer
+    
+    trans_matris = np.zeros((len(uEi),len(uEk)))
+    
+    
+    for a, wl_i in enumerate(wl_f):
+        Ei_h = np.array(Ei)[a]
+        Ek_h = np.array(Ek)[a]
+        index_i = np.where(uEi == Ei_h)[0][0]
+        index_k = np.where(uEk == Ek_h)[0][0]
+        trans_matris[index_i][index_k] = amp[a]
+        
+      
+    trans_matris = np.transpose(trans_matris)
+    for a in range(len(trans_matris)):
+        trans_matris[a] = trans_matris[a]/np.sum(trans_matris[a])
+    
+    trans_matris = np.transpose(trans_matris)
+    
+    return trans_matris, uEk, uEi
+    
+    
 
 #returnerar observerade våglängder från NIST data som passar våglängder bäst
 def auto_assigner(wl,lines,max_err=2):
@@ -100,40 +166,6 @@ def auto_assigner(wl,lines,max_err=2):
     
     
     return np.array(wl_t)[found] #filtrerar ut så det är endast funna våglängder
-
-
-#använder amplituder av våglängder för att beräkna transitions sannolikheter för
-#specifierade transitioner. Transitionerna kommer mappas tillbaka till våglängder
-#då våglängderna identifierar transitionerna unikt
-#P = amplitud för wl/summa av amplituder för wl med samma initala energi
-def trans_prob(element, amp):
-    
-    lines = get_lines(element)
-    wl = lines["ritz_wl_air(nm)"]
-    
-    E_k = lines["Ek(eV)"] #initial energier
-    
-    u_Ek = np.unique(E_k)
-    
-    trans_prob = np.zeros(len(wl)) #transitions sannolikheter
-    
-    for wl_i in u_Ek:
-        index = np.where(wl_i == wl)[0] #plockar ut index med spec. våglängd
-        
-        if(len(index) == 1):
-            trans_prob[index] = 1
-            
-        else:
-            norm = np.sum(amp[index]) #summerar amp för norm
-            np.put(trans_prob, index, amp[index]/norm) #sätter in beräknade sannolikheter där de ska vara
-            
-    return trans_prob
-
-
-#konverterar inexakt data till transitions sannolikheter för alla möjliga våglängder för en neutral atom mellan 200 till 1000 nm   
-def data_till_prob(amp, wl, lines, maxerr = 5):
-    return trans_prob(lines, bucketer(amp, wl, lines, max_err=maxerr))
-
 
     
     
