@@ -121,12 +121,16 @@ def trans_prob(lines, amp):
 
 
 #använder data för att konstruera matris som beskriver sannolikheten för en energinivå att övergå till en annan
+#funktionen returnerar sannolikhetsmatrisen, start energinivåerna som betecknas Ek och slutenerginivåerna som betecknas Ei
+#matrisen anger INTE hur snabbt en energinivå transformeras till en annan, bara sannolikheten att en elektron vid
+#någon framtida punkt antingen transfereras till en eller annan energinivå
 def data_till_prob(amp, wl, lines, maxerr = 5):
     wl_f = auto_assigner(wl, lines)
     
     Ei = lines[pd.to_numeric(lines["obs_wl_air(nm)"]).isin(wl_f)]["Ei(eV)"]
     Ek = lines[pd.to_numeric(lines["obs_wl_air(nm)"]).isin(wl_f)]["Ek(eV)"]
     
+    #unika energinivåer
     uEi = np.unique(Ei)
     uEk = np.unique(Ek)
     #dessa funktioner fiskar ur energinivåer
