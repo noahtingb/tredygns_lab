@@ -64,6 +64,7 @@ def plotaone(data):
     fitaroundres=loada("jsons\\res.json")
     #dumpa("jsons\\values.json",fitaround)
     #dumpa("jsons\\res.json",fitaroundres)
+    names=['Matning 5.1 - Cd']
     for name in names:
         #fitaround[name]=[{"mid":955,"size":2},{"mid":1086,"size":2},{"mid":1326,"size":2},{"mid":1845,"size":3},{"mid":1914,"size":2},{"mid":1921,"size":3},
         #                 {"mid":2312,"size":3},{"mid":2797,"size":3},{"mid":3019,"size":3},{"mid":3122,"size":3},{"mid":3145,"size":3},{"mid":3549,"size":4},
@@ -81,13 +82,13 @@ def plotaone(data):
             return max(min(len(x)-1,value),0)
         fitsx,fitsy=[],[]
         for i,fits in enumerate(fitaround[name]):
-            print(fits["mid"])
-            print(intervall(fits["mid"]-fits["size"]),intervall(fits["mid"]+fits["size"]))
-            print(y[fits["mid"]])
+            #print(fits["mid"])
+            #print(intervall(fits["mid"]-fits["size"]),intervall(fits["mid"]+fits["size"]))
+            #print(y[fits["mid"]])
             midv,fity,fitx=fitpeak(x,y,intervall(fits["mid"]-fits["size"]),intervall(fits["mid"]+fits["size"]))
             fitaroundres[name][i]["midx"]=float(midv)
             fitaroundres[name][i]["midy"]=float(np.max(fity))
-
+            print(float(midv),float(np.max(fity)))
             fitsx.append(fitx)
             fitsy.append(fity)
         print(len(data[name+"_y"]))
@@ -99,5 +100,21 @@ def plotaone(data):
         dumpa("jsons\\res.json",fitaroundres)
         dumpa("jsons\\values.json",fitaround)
         plt.show()
-data=loada()
-plotaone(data)
+import pandas as pd
+def writeofjson(name="jsons\\res.json"):
+    pd.read_json(name).to_excel('output.xlsx')
+def aplot():
+    data=loada("jsons\\kvant.json")
+    x_=np.array(data["Matning 5.1 - Cd_x"])+1.13
+    y_=np.array(data["Matning 5.1 - Cd_y"])*1e6
+    del data
+    plt.plot(x_,y_,label="Mätning 5.1 - Cd")
+    plt.xlabel("Våglängd [nm]")
+    plt.ylabel("Ström [µA]")
+    plt.title("Våglängder hos fotoner för Kadium")
+    plt.legend()
+    plt.show()
+aplot()
+#writeofjson()
+#data=loada()
+#plotaone(data)
